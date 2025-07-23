@@ -4,6 +4,7 @@ import AppWindow from "@/app/components/appwindow";
 import Navbar from "@/app/components/navbar";
 import Footer from "@/app/components/footer";
 import Badges from "@/app/components/badges";
+import Link from "next/link";
 import App from "next/app";
 
 export default function Home() {
@@ -23,7 +24,7 @@ export default function Home() {
         </h1>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {posts.map((post, index) => (
-            <a
+            <Link
               href={`/posts/${post.id}`}
               key={post.id}
               className={post.important ? "col-span-1 md:col-span-2" : ""}
@@ -37,7 +38,7 @@ export default function Home() {
                 {post.excerpt && <p className="pb-3">{post.excerpt}</p>}
                 <Badges tags={post.tags} color={(index % 5) + 1} />
               </AppWindow>
-            </a>
+            </Link>
           ))}
         </div>
         <Footer />

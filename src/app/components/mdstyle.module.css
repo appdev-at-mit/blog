@@ -1,0 +1,28 @@
+@reference "../globals.css";
+
+.markdown {
+  @apply text-lg;
+}
+
+.markdown p,
+.markdown ul,
+.markdown ol,
+.markdown blockquote {
+  @apply my-3;
+}
+
+.markdown h2 {
+  @apply text-2xl mt-6 font-bold leading-snug text-appdev-pink-dark;
+}
+
+.markdown h3 {
+  @apply text-xl mt-3 font-bold leading-snug text-appdev-blue-dark;
+}
+
+.markdown pre {
+  @apply bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto;
+}
+
+.markdown code {
+  @apply font-mono text-sm;
+}

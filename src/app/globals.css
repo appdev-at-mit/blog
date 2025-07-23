@@ -8,8 +8,21 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-figtree);
   --font-mono: var(--font-geist-mono);
+
+  --color-appdev-teal: #96c2c5;
+  --color-appdev-teal-dark: #5a8b8d;
+  --color-appdev-yellow: #f2d16b;
+  --color-appdev-yellow-dark: #c4a24b;
+  --color-appdev-blue: #7daaca;
+  --color-appdev-blue-dark: #4a6f8b;
+  --color-appdev-green: #a3bfa2;
+  --color-appdev-green-dark: #6a8b6c;
+  --color-appdev-purple: #b796d9;
+  --color-appdev-purple-dark: #7a5b8b;
+  --color-appdev-pink: #f2a6c1;
+  --color-appdev-pink-dark: #c47a9b;
 }
 
 @media (prefers-color-scheme: dark) {

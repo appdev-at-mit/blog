@@ -13,6 +13,9 @@
     "next": "15.4.3",
     "react": "19.1.0",
     "react-dom": "19.1.0",
+    "rehype-highlight": "^7.0.2",
+    "rehype-parse": "^9.0.1",
+    "rehype-stringify": "^10.0.1",
     "remark": "^15.0.1",
     "remark-html": "^16.0.1"
   },

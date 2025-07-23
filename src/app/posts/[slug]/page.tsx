@@ -5,11 +5,20 @@ import Footer from "@/app/components/footer";
 import { getPostBySlug, convertMarkdownToHtml } from "@/lib/api";
 import MDBody from "@/app/components/mdbody";
 
+import rehypeHighlight from "rehype-highlight";
+import rehypeParse from "rehype-parse";
+import rehypeStringify from "rehype-stringify";
+import { unified } from "unified";
+
 export default async function Page({ params }: { params: { slug: string } }) {
   const { slug } = await params;
   const post: Post = getPostBySlug(slug);
   const contentHtml = convertMarkdownToHtml(post.content);
-
+  const contentHtmlHighlighted = await unified()
+    .use(rehypeParse, { fragment: true })
+    .use(rehypeHighlight)
+    .use(rehypeStringify)
+    .process(contentHtml);
   return (
     <div className="bg-gray-100 min-h-screen flex flex-col">
       <Navbar />
@@ -26,7 +35,11 @@ export default async function Page({ params }: { params: { slug: string } }) {
             {post.author.name} | {new Date(post.date).toLocaleDateString()}
           </p>
           <MDBody>
-            <div dangerouslySetInnerHTML={{ __html: contentHtml }} />
+            <div
+              dangerouslySetInnerHTML={{
+                __html: String(contentHtmlHighlighted),
+              }}
+            />
           </MDBody>
           {post.image && <img src={post.image} alt={post.title} />}
         </AppWindow>

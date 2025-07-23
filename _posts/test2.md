@@ -15,7 +15,45 @@ This is a test post.
 Here is some code:
 
 ```javascript
-console.log("Hello, world!");
+function preprocess() {
+  // load image into OpenCV
+  let src = cv.imread(PHOTO_ELEM);
+
+  // convert to grayscale
+  let gray = new cv.Mat();
+  cv.cvtColor(src, gray, cv.COLOR_RGBA2GRAY, 0);
+
+  // otsu thresholding
+  let binary = new cv.Mat();
+  cv.threshold(gray, binary, 150, 255, cv.THRESH_BINARY + cv.THRESH_OTSU);
+
+  // morphological operations for cleanup and noise reduction
+  let closed = new cv.Mat();
+  let kernel = cv.Mat.ones(2, 2, cv.CV_8U);
+  cv.morphologyEx(
+    binary,
+    closed,
+    cv.MORPH_OPEN,
+    kernel,
+    new cv.Point(-1, -1),
+    1,
+    cv.BORDER_CONSTANT,
+    cv.morphologyDefaultBorderValue(),
+  );
+
+  // display the processed image
+  cv.imshow(PROCESSED_ELEM, closed);
+
+  // save image to image element
+  let data = PROCESSED_ELEM.toDataURL("image/png");
+  PROCESSED_IMAGE_ELEM.src = data;
+
+  src.delete();
+  gray.delete();
+  binary.delete();
+
+  return closed;
+}
 ```
 
 ## Another Subheading

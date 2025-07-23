@@ -20,7 +20,7 @@
 }
 
 .markdown pre {
-  @apply bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto;
+  @apply bg-gray-700 p-4 rounded-lg overflow-x-auto;
 }
 
 .markdown code {

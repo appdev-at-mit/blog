@@ -15,8 +15,12 @@ export function getPostBySlug(slug: string): Post {
 
   const post: Post = {
     id: slug,
-    ...data,
+    title: data.title,
+    author: data.author,
+    date: data.date,
+    tags: data.tags,
     content: content,
+    important: data.important || false,
   };
 
   return post;
@@ -29,6 +33,11 @@ export function convertMarkdownToHtml(markdown: string): string {
 
 export function getAllPosts(): Post[] {
   const fileNames = fs.readdirSync(postsDirectory);
+  fileNames.sort((a, b) => {
+    const dateA = new Date(getPostBySlug(a.replace(/\.md$/, "")).date);
+    const dateB = new Date(getPostBySlug(b.replace(/\.md$/, "")).date);
+    return dateB.getTime() - dateA.getTime();
+  });
   const posts: Post[] = fileNames.map((fileName) => {
     const slug = fileName.replace(/\.md$/, "");
     return getPostBySlug(slug);

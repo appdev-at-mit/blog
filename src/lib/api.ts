@@ -21,6 +21,7 @@ export function getPostBySlug(slug: string): Post {
     tags: data.tags,
     content: content,
     important: data.important || false,
+    excerpt: data.excerpt || "",
   };
 
   return post;

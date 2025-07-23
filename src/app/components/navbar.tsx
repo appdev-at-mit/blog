@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import Image from "next/image";
 import Link from "next/link";
@@ -17,13 +17,22 @@ export default function Navbar() {
           />
         </Link>
         <div className="hidden space-x-4 md:flex items-center">
-          <a href="https://mitappdev.com/team" className="text-gray-500 hover:text-gray-800">
+          <a
+            href="https://mitappdev.com/team"
+            className="text-gray-500 hover:text-gray-800"
+          >
             Team
           </a>
-          <a href="https://mitappdev.com/products" className="text-gray-500 hover:text-gray-800">
+          <a
+            href="https://mitappdev.com/products"
+            className="text-gray-500 hover:text-gray-800"
+          >
             Products
           </a>
-          <a href="https://blog.mitappdev.com" className="text-gray-500 hover:text-gray-800">
+          <a
+            href="https://blog.mitappdev.com"
+            className="text-gray-500 hover:text-gray-800"
+          >
             Blog
           </a>
           <a
@@ -78,8 +87,10 @@ export default function Navbar() {
         >
           Blog
         </Link>
-        <Link href="https://mitappdev.com/apply"
-          className="block text-gray-500 hover:text-gray-800 py-2">
+        <Link
+          href="https://mitappdev.com/apply"
+          className="block text-gray-500 hover:text-gray-800 py-2"
+        >
           Apply
         </Link>
       </div>

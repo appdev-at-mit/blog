@@ -3,8 +3,8 @@ title: "looking back"
 tags: ["history", "reflection"]
 excerpt: "I can't believe we thought this was a good idea a hundred years ago."
 author:
-    name: "Jieruei Chang"
-    id: "convolution"
+  name: "Jieruei Chang"
+  id: "convolution"
 date: 2125-07-23
 ---
 

@@ -1,7 +1,13 @@
 import { colorSets } from "@/lib/colorsets";
 
-export default function Badges({tags, color}: {tags: string[], color: number}) {
-    const colorSet = colorSets[color];
+export default function Badges({
+  tags,
+  color,
+}: {
+  tags: string[];
+  color: number;
+}) {
+  const colorSet = colorSets[color];
   return (
     <div className="flex flex-wrap gap-2">
       {tags.map((tag, index) => (

@@ -5,6 +5,8 @@ import Footer from "@/app/components/footer";
 import { getPostBySlug, convertMarkdownToHtml } from "@/lib/api";
 import MDBody from "@/app/components/mdbody";
 
+import Link from "next/link";
+
 import rehypeHighlight from "rehype-highlight";
 import rehypeParse from "rehype-parse";
 import rehypeStringify from "rehype-stringify";
@@ -23,12 +25,12 @@ export default async function Page({ params }: { params: { slug: string } }) {
     <div className="bg-gray-100 min-h-screen flex flex-col">
       <Navbar />
       <article className="flex-1 mx-5 md:mx-10 lg:mx-80 pt-10 font-sans">
-        <a
+        <Link
           href="/"
           className="font-mono py-2 tracking-widest text-gray-300 uppercase pb-5 block"
         >
           &lt; back to journal
-        </a>
+        </Link>
         <AppWindow color={0}>
           <h1 className="text-4xl font-bold pb-3">{post.title}</h1>
           <p className="font-mono uppercase text-sm pb-3">
@@ -41,7 +43,6 @@ export default async function Page({ params }: { params: { slug: string } }) {
               }}
             />
           </MDBody>
-          {post.image && <img src={post.image} alt={post.title} />}
         </AppWindow>
       </article>
       <div className="mx-5 md:mx-10 lg:mx-80 pt-10">

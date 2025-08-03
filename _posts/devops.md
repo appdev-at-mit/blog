@@ -280,7 +280,7 @@ The domain "localhost." and any names falling within ".localhost."
 
 That's right, `localhost` is essentially hard-coded as a special case in the DNS specification.
 
-Okay, what does this mean? A `loopback` address simply is an IP address that *points back* to the original computer
+Okay, what does this mean? A **loopback** address simply is an IP address that *points back* to the original computer
 that made the request. In other words, I can refer to another port running on my system with `localhost:<port>`. 
 This allows processes on my system to communicate between each other, without wasting a DNS lookup or even an internet connection.
 
@@ -472,7 +472,7 @@ On the otherhand, your nginx reverse proxy running on your server can connect to
 With our setup from part 1, if someone wanted to update the app with their changes, they would have to:
 
 1. Merge the pull request on Github.
-2. SSH onto a staging server.
+2. SSH onto a staging server (connect to a terminal remotely).
 3. Pull the code from Github.
 4. Build the code, install new dependencies, etc.
 5. Run the test suite and check that everything passes.
@@ -501,14 +501,14 @@ and is really simple to get started with.
 
 ## The Design Problem
 
-Okay, great! We've set up a web application and added a CI/CD pipeline. But AppDev fortunately does not just have *a* web application,
+Okay, great! We've set up a web application and added a CI/CD pipeline. But AppDev unfortunately (or fortunately) does not just have *a* web application,
 as multiple projects are developed every semester and all get deployed together! It would be unnecessarily costly to allocate a separate
 staging server for every single one of them. So, we face a new challenge: how do we coordinate *arbitrarily many* applications to live together on one CI server, 
 and have them all accessed by the web?
 
 There are a few other considerations to keep in mind:
 
-- When a new application goes up or is reloaded, we cannot interrupt the other applications on the same server.
+- When a new application goes up or is reloaded, we cannot interrupt the other applications on the same server. 
 - Only one application can listen to any port at any given time.
 - If an individual application goes down or is compromised, we must not allow any of the other applications to also get hacked.
 - Applications may have differing dependencies or even conflicting dependencies.
@@ -562,21 +562,38 @@ set each one up manually every time *anyways*.
 **Docker** aims to cover all of these bases. A Docker **container** is an *isolated* "package" of code. You can think of it as an "executable" file on Windows,
 where *all* it needs to run is itself. 
 
-Note that while so far, this post has been fairly framework/service agnostic, there really is only *one* industry standard for containerizing apps, and it's Docker.
-Any self respecting junior developer must have familiarity with Docker.
-
 Roughly speaking, using Docker comes in two parts:
 
 1. First, the Docker container needs to built. You can specify how its built using a **`Dockerfile`**. By default, the Docker container is empty, so you will
 have to tell Docker which files to copy into the container, and from where. You will have tell Docker how to install dependencies into the container, and
 which commands to run. Note that I am carefully saying "tell Docker...", because you never run or install anything by hand, only specify how to do it (similar
-to a shell script). In other words: configure once, build automatically many times. The resulting container, once built, is known as a Docker **image**.
+to a shell script). In other words: configure once, build automatically many times. 
 2. Once you have your image, you can run it *anywhere*, on any (powerful enough) machine that has Docker installed. You don't even need the Dockerfile!
 Importantly, this means I can build an image once and then run the same image on *many* different servers, allowing for extremely easy horizontal scaling.
 However, depending on how you've set up your Docker image, you may need to supply some things elsewhere. This includes *mounting* a directory (e.g. to connect
 to a database), *exposing* some ports to the broader network, or connecting two or more images in their own small network to talk to one another.
 
-As with the other services mentioned in this post, you can find sample Docker configurations, with explanations, in part 3.
+Docker works by running a Docker **daemon**. A daemon is an eternally running background process that can communicate with other processes or the terminal, 
+named after the hypothetical [Maxwell's Demon](https://en.wikipedia.org/wiki/Maxwell%27s_demon). Commands such as `docker build`, `docker compose`, and `docker ps`
+communicate with the daemon, which will take the corresponding actions. 
+
+<img width="1009" height="527" 
+  alt="Docker diagram" 
+  src="https://github.com/user-attachments/assets/996564bc-9d52-4878-ac56-57b553de4ab1" />
+
+All communications with the daemon run on the socket `unix:///var/run/docker.sock`. (This is *not* a web url; the `unix://` specifies we are using a UNIX socket, and
+the location is `/var/run/docker.sock`). A socket is essentially a software interface for processes to communicate with each other (notably, distinct from and faster than a network 
+that TCP/IP would run on).
+
+Docker also maintains a **registry** of pre-built **images** available for download or install. Recall that by default, docker containers are empty. This isn't
+very convenient if you are running a Node application, for example; you would have to install Node by hand for your docker image. Rather, people have gone
+to the trouble of doing this for you and publishing an image to the registry that has Node already installed and optimized; all you have to do is add your
+application code and dependencies to it. **A Docker container and a Docker image are two completely different things, never get them confused!** You can run a Docker container,
+but you *cannot* run a Docker image. Docker images are just a pre-built "template" of sorts that can be loaded onto a container. 
+
+As with the other services mentioned in this post, you can find sample Docker configurations with explanations, in part 3. 
+Note that while so far, this post has been fairly framework/service agnostic, there really is only *one* industry standard for containerizing apps, and it's Docker.
+Any self respecting junior developer must have familiarity with Docker.
 
 I want to make something clear: Docker **is not a virtual machine**. A virtual machine has its own operating system (*kernel*), and runs 100 percent isolated
 from the host. Docker is a *container*, meaning that it will use the host operating system. For instance, I can install Windows (or other GUI apps) on a VM running on Linux, but
@@ -585,13 +602,115 @@ In other words, Docker containerizes applications with the same tools that you g
 
 ## Putting Multiple Docker Images Together
 
+A typical full stack application isn't just one process, but oftentimes is comprised of multiple. Our example from Part 1 had nginx proxying requests,
+a frontend at `localhost:3000`, and an API backend at `localhost:8000`. Larger projects might even be split into microservices, or have even more moving parts.
 
+Recall that Docker requires you to specify the command that Docker will run inside the container when you use `docker run`. In other words,
+if this command is `npm run start`, then `docker run` will trigger `npm run start` inside the container. So, one solution would be to set
+this command to `sudo systemctl start nginx & npm run start-server & npm run start-api` (or some equivalent), forking to begin three processes.
+While doable, it's certainly not the best way to approach things. The official Docker documentation actually promotes separating these three processes
+to three different containers, citing separation of concerns. 
+
+A common design pattern used in this case goes as follows:
+
+- Each **service** (proxy, frontend, backend) would live in its own container. The container would contain nothing else other than the application code.
+- For any *persistent files* that need to be read from or written to disk (storage, static files, logs, etc.), a **volume** is mounted onto all the relevant images.
+Part 3 contains an explanation of this, but the gist is that we can attach a directory on disk (i.e. not in a container) and have it accessible by a certain
+filepath from within the container, essentially allowing the image to read and write outside of the container to a place we specify. 
+- For any communication that needs to be handled *between* images, we create a **bridge network** (an interface for TCP/IP but in software) that allows
+only these images to communicate with each other over network. For example, if my frontend needs to call an API endpoint during rendering, they would do it
+over the bridge network.
+- For any communication that needs to be handled to the outside network, we can **expose** ports, and can even *map* them to ports inside the container.
+For instance, we could specify that port `1240` outside the container (i.e. `localhost:1240`) would be directed to port `80` inside the container.
+
+<img width="1874" height="714" 
+  alt="Docker Compose diagram" 
+  src="https://github.com/user-attachments/assets/2b78ff10-aa77-486b-ba4b-1b8c6bad758e" />
+
+In theory, all of this can be specified as an extremely long set of arguments to a `docker run` command; however, in practice, it is much better
+to store all the configuration in a file, named `docker-compose.yaml`. (We have example configurations in part 3). Then, a service known as **Docker Compose**
+would read that file, translate all of that into instructions to the daemon, and run all of your services at once with `docker compose build && docker compose up`.
+
+A caveat I learned the hard way while setting all of this up: there's actually multiple "docker composes" out there. One of them is part of Docker itself,
+and is called with `docker compose up`. Another is an installable third-party library (apparently written in Python?), and is called with `docker-compose up`. 
+**You should always use docker compose from Docker itself as a plugin.** The third-party library is an older version and is pretty much deprecated. 
 
 ### So You Think You Know DNS
 
+There's one more wrinkle with all of this. Remember that by default, each Docker container has its own isolated network, in addition to a bridge network if it's
+part of a Docker compose. But this means that from inside my proxy container, `localhost:3000` points to the *proxy container's* 3000 port, not my frontend container's 3000 port!
+Simultaneously, if I use `127.0.0.1:3000`, this would point to the *server's* 3000 port (since the IP resolves to the server itself). We could, of course, expose the frontend's 3000 port,
+but this should immediately fire off some alarms in your head for code smells. After all, if the whole point of containers is to careful manage access in and out of them, exposing more
+ports than necessary feel like a bad idea.
+
+It turns out that Docker names all of your containers to reference them later. So I might have a proxy running as `mapit-proxy` and a server as `mapit-server`. 
+If `mapit-proxy` and `mapit-server` are connected via a bridge, then `mapit-proxy` can send a request through the url **`http://mapit-server:3000`**.
+
+Wait, what?! I thought DNS resolution had only `localhost` as a special case! 
+
+It turns out that Docker provides its own (local) DNS server that requests from inside containers travel to first. When you add a service (e.g. through Docker compose or by running it),
+the name gets added to the DNS server. Docker will check if any service names match the url, and if not, only then will the request go out to the broader Internet.
+
 ## One Reverse Proxy, Two Reverse Proxy...
 
+We are finally ready to apply this knowledge to the task at hand: setting up CI/CD for AppDev. Let's reason our way through the design:
+
+- The first step is to set expectations for all projects. They should use Docker and Docker compose. At an administrative (people) level, we won't allow projects to be built without it.
+Since we aren't technically running arbitrary code from the world, only from trusted club members, this is a fine implementation for now.
+- Now, we need to set up Jenkins in order to automatically pull code, build the docker containers, and the start the processses. While we *could* Dockerize Jenkins, this would mean
+running Docker containers from within a Docker container. For [reasons](https://jpetazzo.github.io/2015/09/03/do-not-use-docker-in-docker-for-ci/), 
+Docker in Docker (`dind`) is difficult to get right. For right now, we've chosen to avoid dind, but in theory it would
+be more optimal to Dockerize Jenkins as well.
+- Jenkins, by itself, has a web dashboard (ci.mitappdev.com). This means we need a reverse proxy sitting in front of it, proxying traffic to `localhost:60000`. Jenkins also needs to
+serve static files (such as those in your "workspace"), so we need a webserver as well. 
+- We also must proxy traffic to each of our applications. Notably, this must be a *dynamic* proxy, in the sense that we should be able to update where traffic gets proxied to
+without restarting the entire server. This would occur whenever we add a new project, remove an old project, or move an existing project around / update its configuration. If we had
+to restart the entire server, websockets would disconnect and other service could be interrupted for our other applications.
+- We're kind of in a pickle in terms of the service that would do this for us. Nginx is both a web server *and* a reverse proxy, but it isn't dynamic; changing the configuration requires
+a full restart, which is unacceptable. On the other hand, Traefik fits our dynamic proxy use case exactly; it supports getting proxy locations directly from the Docker daemon itself
+(so we don't have to do any extra configuration for each project). Unfortunately, Traefik is *only* a reverse proxy, meaning that it won't be able to serve any static files.
+- The solution: if neither works, use both! Web traffic first gets proxied to Traefik, which will dynamically route the traffic to each of our services. Once it reaches any particular
+service (such as Jenkins, or a particular AppDev project), then Nginx (or another webserver) handles the request, either by returning a static file or proxying even further.
+
+Here's the full diagram of the design (note that Traefik comes with its own dashboard we have to proxy to as well). Blue boxes denote docker containers, while
+dashed blue boxes represent containers inside a docker compose and connected by a bridge.
+
+<img width="999" height="567" 
+  alt="AppDev CI/CD architecture" 
+  src="https://github.com/user-attachments/assets/80e2c577-d30d-4f92-9ff6-eee756d6c2e6" />
+
+After many hours of configuration pain, it works! And it does exactly what we want it to. 
+  
 ## Summary: The Lifetime of a Request
+
+So, to review, let's put everything we've covered so far together with a look into the *full* journey of a request when you navigate to an AppDev project on our staging server.
+
+1. The browser recognizes you are going to `project.mitappdev.com`.
+2. The browser connects to a DNS provider. The provider, after a recursive DNS lookup, returns the IP address `104.21.62.172`. This is one of **Cloudflare's** servers, not AppDev's.
+3. The browser makes an initial request in HTTP to `104.21.62.172`, embeds the HTTP request with TCP headers, and sends it using TCP/IP. This request might be forward proxied,
+depending where you make it from. 
+4. Cloudflare responds, also in HTTP, accepting the request to upgrade to HTTPS. After an initial "handshake" part of the HTTPS protocol and validating Cloudflare's certificate,
+all traffic from here on out is encrypted.
+5. The browser now embeds your GET request and sends it to Cloudflare using HTTPS. Cloudflare looks at the `Host: project.mitappdev.com` header of the request to determine where the request originated
+and figure out where to send the request next, in a "let me see if I can find some in the back for you" kind of way. This is the **first reverse proxy**.
+6. Cloudflare checks its records and finds a match with `project.mitappdev.com`. Cloudflare sends a new request containing the same data to AppDev's servers at (say) `111.222.33.44`. 
+7. Another HTTPS upgrade and handshake occurs on ports 80 and 443. Traefik is listening at both ports. Once the request arrives, Traefik also looks at the `Host: project.mitappdev.com` header
+and decides to proxy the request to `localhost:1240`. This is the **second reverse proxy**. 
+8. The Docker daemon is waiting on `localhost:1240`, and checks all of the currently running Docker containers for any that open their ports. It finds that the `project-proxy` container has
+port 1240 exposed, and is mapped to port 80 inside the container. Docker forwards the request (now through Docker's software network) to an Nginx instance running inside `project-proxy`
+listening on `http://project-proxy:80`.
+9. Inside the `project-proxy` container, nginx takes in the request, and once again looks at the `Host: project.mitappdev.com` header to figure out where to go next. 
+It decides to proxy the request to `http://project-server:3000`,which is a network running on a different container that's connected by a bridge. This is the **third reverse proxy.**
+10. Inside the `project-server` container, an Express server receives the request and *finally* handles it. It returns a HTML response back to the `project-proxy` container.
+11. Having received a response, the `project-proxy` container now relays that response back to Docker, which sends it back to Traefik.
+12. Having received a response, Traefik makes a copy of the response and encrypts it (recall that outside the server we use HTTPS). It sends it back to Cloudflare.
+13. Having received a response, Cloudflare finally sends a copy of the response back to your browser.
+14. Having received a response, our browser displays the webpage.
+
+And this is just the *most basic* version with one server. Many industry architectures are far more complex. We haven't even looked into horizontally scaling with multiple servers,
+load balancing, caching, or a host of other designs and services yet. 
+
+The web is complex. And it's kinda amazing that the browser abstracts all of that complexity away so a user can play Flash games or read Wikipedia to their heart's content.
 
 # Part 3: Code and Configuration Snippets
 

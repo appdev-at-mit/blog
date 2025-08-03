@@ -469,17 +469,129 @@ On the otherhand, your nginx reverse proxy running on your server can connect to
 
 ## What is CI/CD?
 
+With our setup from part 1, if someone wanted to update the app with their changes, they would have to:
+
+1. Merge the pull request on Github.
+2. SSH onto a staging server.
+3. Pull the code from Github.
+4. Build the code, install new dependencies, etc.
+5. Run the test suite and check that everything passes.
+6. Reload the currently running app.
+7. SSH onto the deployment server.
+8. Repeat steps 3 through 6.
+
+That's a lot of work! And it's work that could potentially be *automated*.
+
+Automated **Continuous Integration / Continuous Delivery (CI/CD)** aims to take care of this issue. With a CI/CD server,
+code pushed to Github are automatically merged, test, and built without the developer having to lift a finger. 
+In most cases, it can even be deployed with a hitch. This is what services like Vercel take care for you, when
+pushes to your repo are reflected in the main app within just a couple of minutes.
+
+<img width="318" height="159" 
+  alt="A visualization of the CI/CD pipeline." 
+  src="https://github.com/user-attachments/assets/c687f8a4-0ba2-432a-9c14-c72daffe9023" />
+
+Using an automated CI/CD pipeline not only saves time, but also encourages developers to bring the app to a working state often, 
+and to make small incremental changes.
+
+There are many CI/CD libraries out there, some of which run exclusively on the cloud and some that are self-hosted.
+AppDev uses Jenkins running on a cloud server (although I'm personally hoping we get our hands on a physical server soon).
+While Jenkins is not as new as other alternatives, it still offers a large amount of features and flexibility, a great plugin ecosystem,
+and is really simple to get started with. 
+
 ## The Design Problem
 
-## Welcome to `chroot` Jail 
+Okay, great! We've set up a web application and added a CI/CD pipeline. But AppDev fortunately does not just have *a* web application,
+as multiple projects are developed every semester and all get deployed together! It would be unnecessarily costly to allocate a separate
+staging server for every single one of them. So, we face a new challenge: how do we coordinate *arbitrarily many* applications to live together on one CI server, 
+and have them all accessed by the web?
 
-## Docker? I Hardly Know Her
+There are a few other considerations to keep in mind:
 
-## Docker Compose 
+- When a new application goes up or is reloaded, we cannot interrupt the other applications on the same server.
+- Only one application can listen to any port at any given time.
+- If an individual application goes down or is compromised, we must not allow any of the other applications to also get hacked.
+- Applications may have differing dependencies or even conflicting dependencies.
 
-## So You Think You Know DNS
+So. What to do? The rest of this part will show how we addressed this interesting design problem.
+
+## Containerizing a Single Application
+
+### Welcome to `chroot` Jail 
+
+Anyone who has installed linux "by hand" is likely familiar with the `chroot` command. It's very simple: imagine I have a filesystem
+
+```
+- passwords
+- class-files
+  - 6-102
+  - 6-191
+- webserver
+  - .git
+  - client
+  - server
+    - src
+    - test
+```
+
+and then I run `chroot /webserver`, my filesystem will "appear to become"
+
+```
+- .git
+- client
+- server
+  - src
+  - test
+```
+
+as in that `ls -a /` will return only `.git`, `client`, and `server`. In other words, the *root* directory is now where `/webserver` used to be,
+and Linux will not allow me to access other directories such as `class-files` and `passwords`, because they don't exist when I'm `chroot`ed. 
+
+This is a basic example of **containerizing** an application: squaring it away in some part of the filesystem where it cannot interact with the rest of 
+the filesystem. From the application's perspective, `/` takes it to root's `/webserver`, and that's as far back as it can go. This will help with
+a couple issues in our problem: we are able to deal with differing dependencies (because they will be installed to different points) and we get
+to protect other applications in case one gets hacked. **Sidenote: this only really acts as a "jail" if you run the application as an unprivileged user.
+Running it as root allows the process to trivially break out of chroot jail.**
+
+### Docker? I hardly know her
+
+While interesting, `chroot` by itself isn't really sufficient in this day and age. First, there's *many* ways to mess it up. Second, it doesn't really
+containerize the app in other interfaces, such as the network. Finally, they're pretty hard to maintain, don't scale very well, and you kinda have to
+set each one up manually every time *anyways*.
+
+**Docker** aims to cover all of these bases. A Docker **container** is an *isolated* "package" of code. You can think of it as an "executable" file on Windows,
+where *all* it needs to run is itself. 
+
+Note that while so far, this post has been fairly framework/service agnostic, there really is only *one* industry standard for containerizing apps, and it's Docker.
+Any self respecting junior developer must have familiarity with Docker.
+
+Roughly speaking, using Docker comes in two parts:
+
+1. First, the Docker container needs to built. You can specify how its built using a **`Dockerfile`**. By default, the Docker container is empty, so you will
+have to tell Docker which files to copy into the container, and from where. You will have tell Docker how to install dependencies into the container, and
+which commands to run. Note that I am carefully saying "tell Docker...", because you never run or install anything by hand, only specify how to do it (similar
+to a shell script). In other words: configure once, build automatically many times. The resulting container, once built, is known as a Docker **image**.
+2. Once you have your image, you can run it *anywhere*, on any (powerful enough) machine that has Docker installed. You don't even need the Dockerfile!
+Importantly, this means I can build an image once and then run the same image on *many* different servers, allowing for extremely easy horizontal scaling.
+However, depending on how you've set up your Docker image, you may need to supply some things elsewhere. This includes *mounting* a directory (e.g. to connect
+to a database), *exposing* some ports to the broader network, or connecting two or more images in their own small network to talk to one another.
+
+As with the other services mentioned in this post, you can find sample Docker configurations, with explanations, in part 3.
+
+I want to make something clear: Docker **is not a virtual machine**. A virtual machine has its own operating system (*kernel*), and runs 100 percent isolated
+from the host. Docker is a *container*, meaning that it will use the host operating system. For instance, I can install Windows (or other GUI apps) on a VM running on Linux, but
+I cannot do the same with Docker. The whole point of beginning with the `chroot` example is that **you should think of Docker as an interface to configure a powerful chroot**. 
+In other words, Docker containerizes applications with the same tools that you get, such as `chroot` (and others not mentioned), instead of running a whole other OS.
+
+## Putting Multiple Docker Images Together
+
+
+
+### So You Think You Know DNS
 
 ## One Reverse Proxy, Two Reverse Proxy...
+
+## Summary: The Lifetime of a Request
 
 # Part 3: Code and Configuration Snippets
 

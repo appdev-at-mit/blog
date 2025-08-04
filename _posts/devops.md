@@ -588,8 +588,8 @@ that TCP/IP would run on).
 Docker also maintains a **registry** of pre-built **images** available for download or install. Recall that by default, docker containers are empty. This isn't
 very convenient if you are running a Node application, for example; you would have to install Node by hand for your docker image. Rather, people have gone
 to the trouble of doing this for you and publishing an image to the registry that has Node already installed and optimized; all you have to do is add your
-application code and dependencies to it. **A Docker container and a Docker image are two completely different things, never get them confused!** You can run a Docker container,
-but you *cannot* run a Docker image. Docker images are just a pre-built "template" of sorts that can be loaded onto a container. 
+application code and dependencies to it. **A Docker container and a Docker image are two completely different things, never get them confused!** A Docker image becomes
+a container once it is run. Docker images are just a pre-built "template" of sorts that can be loaded onto a container. 
 
 As with the other services mentioned in this post, you can find sample Docker configurations with explanations, in part 3. 
 Note that while so far, this post has been fairly framework/service agnostic, there really is only *one* industry standard for containerizing apps, and it's Docker.
@@ -715,6 +715,93 @@ The web is complex. And it's kinda amazing that the browser abstracts all of tha
 # Part 3: Code and Configuration Snippets
 
 ## Docker
+
+First, an example Dockerfile:
+
+```Dockerfile
+# Stage 1: compile typescript
+FROM node:latest AS build
+
+WORKDIR /usr/local/app
+
+COPY ./package*.json ./
+
+RUN npm install
+
+COPY *.config.js .
+
+COPY ./server/src ./server/src
+COPY ./server/tsconfig.json ./server/tsconfig.json
+
+RUN npm run compile
+
+# Stage 2: prod
+FROM node:latest 
+
+WORKDIR /usr/local/app
+
+COPY --from=build /usr/local/app/server/dist/src ./server
+
+COPY package*.json ./
+
+RUN npm install --production
+
+EXPOSE 1241
+
+CMD ["node", "server/server.js"]
+
+HEALTHCHECK --timeout=2s --retries=3 --interval=5m CMD curl --fail http://localhost:1241 || exit 1
+```
+
+Okay, first things first. A dockerfile consists of **instructions**, one per line. Lines starting with a `#` are comments, like Python.
+Instructions consist of an uppercase word (e.g. `CMD`), followed by a varying number of arguments. There is no control flow (`if` / `while`) in a Dockerfile,
+everything gets executed sequentially.
+
+- The `FROM <image-name>` instruction pulls a Docker image (recall they are immutable "templates", typically uploaded to the Docker registry). Here, since we have a Node application,
+we will start off our container with Node and all of its related goodies. The `:latest` simply species to use the latest version, but you could use `:alpine` or other
+versions if you wanted.
+- The `WORKDIR <container-directory>` instruction is equivalent to a `cd`, subsequent instructions will use that directory as the current working directory.
+- The `COPY <host-directory> <container-directory>` instruction copies a file or directory *from* a directory on your machine to a directory onto the container. Note that this is
+different from mounting a directory, because changes made on your system will not affect changes to the container until the container is rebuilt.
+- The `RUN` command runs an instruction in the shell.
+- The `EXPOSE <port-number>` command exposes a network port to the host. That is, requests to `localhost:1241` from the host will be routed to `container:1241` inside the container.
+- The `CMD <command>` instruction tells Docker the *default* run instruction; that is, the shell command executed upon `docker run`. Note that we specify 
+- The `HEALTHCHECK [options] CMD <command>` instruction specifies a command to run in order to "probe" the image. If the command returns an exit code of 0, then this indicates
+that the container is "healthy" (for example, this could mean that a webserver is running). On the other hand, if it fails, then the container is unhealthy. This is useful because
+oftentimes containers can run without crashing but don't do what you want them to.
+
+So, let's run through the example Dockerfile. The first thing to realize is that *two* images are built: I've labelled them Stage 1 and Stage 2 in comments (in general,
+each `FROM` instruction begins a new container). 
+
+1. We start with the `node:latest` image. We also label this image `build` to use in the second stage.
+2. We `cd` to `/usr/local/app` (a fairly conventional place to put our application files).
+3. We copy all the files that match `./package*.json` in our host directory (where the Dockerfile lives). For a typical Node project, this will include `package.json` and `package-lock.json`,
+which are files that tell `npm` what packages to install. This gets copied to the current working directory in the container.
+4. We run `npm install` inside the container to install the necessary packages for our code. (If you're keeping score, this means we now have a directory at `/usr/local/app/node_modules/`.)
+5. We copy all of our source code to the corresponding location in the container, as well as our `tsconfig.json`. Note that we are maintaining a strict subset of the directory structure of the host.
+6. We run `npm run compile`, which is a script I've defined that builds the Typescript into Javascript (via `tsc`) to the `./server/dist/src` directory.
+
+We've completed the first container, which contains nothing but some configuration files, Typescript source code, and Javascript source code. Now, we create a new one.
+
+1. We again start with the `node:latest` image, and we again `cd` to `/usr/local/app`.
+2. We copy all of the files in `./server/dist/src` from the `build` container (stage 1) to `./server` in our second container (stage 2). Note that `--from=build` means we aren't
+copying from the host filesystem anymore.
+3. We again copy `package.json` and `package-lock.json`.
+4. We run `npm install --production`, which will *only* install dependencies that are necessary to run, and will omit things like Typescript or type declaration modules.
+5. We expose port 1241 to allow other containers to communicate with this one.
+6. We specify the default command to be `node server/server.js`, which will execute by default when we run the container.
+7. Finally, we specify a health check, using curl to poke the port every 5 minutes to check if the container is healthy.
+
+### Optimizing the Container
+
+
+
+### Sidenote: Shell vs. Exec form
+
+What's going on with passing the argument to `CMD` as a list but not elsewhere? For `CMD`, we want to use Docker's **Exec Form**, which is run
+with PID 1 (aka it is the "primary" process of the container), and will stop properly when you stop the container via Ctrl-C, for example. On the other hand, 
+for everything else, it is more convenient to run in **Shell Form** (such as our `RUN` instructions), because we get to take advantage of shell processing 
+(e.g. with environment variables).
 
 ## Docker compose
 

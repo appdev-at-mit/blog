@@ -26,3 +26,15 @@
 .markdown code {
   @apply font-mono text-sm;
 }
+
+.markdown ul {
+  @apply list-disc pl-8;
+}
+
+.markdown ol {
+  @apply list-decimal pl-5;
+}
+
+.markdown img {
+  @apply max-w-full h-auto rounded-lg my-4;
+}

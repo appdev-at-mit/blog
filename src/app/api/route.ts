@@ -6,6 +6,8 @@ export async function GET() {
   return new Response(JSON.stringify(posts), {
     headers: {
       "Content-Type": "application/json",
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "GET",
     },
   });
 }

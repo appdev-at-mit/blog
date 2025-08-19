@@ -20,8 +20,7 @@ I experimented with geometry heuristics: detect long straight segments, classify
 
 In the end, I discovered that text is displayed slightly differently in SVG than the rest of the geometry. It's rendered with a slightly thicker stroke, and filtering by that solves the problem perfectly.
 
-![10_5](https://github.com/user-attachments/assets/67006254-95e4-448a-a692-7886ad4bbbb4)
-
+![example floorplan](https://github.com/user-attachments/assets/09d806d9-6521-4329-b695-84756339b7c6)
 
 ## rooms for thought
 

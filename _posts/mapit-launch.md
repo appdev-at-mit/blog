@@ -52,8 +52,13 @@ If you are a current student and any of this sounds interesting to you, we'd lov
 The following members of AppDev worked very hard to make this project possible:
 
 - Hailey Pan (team lead), (6-3, c/o 2027)
+- Kao Anchaleenukoon, (6-3, c/o 2027)
 - Jieruei Chang, (6-3, c/o 2028)
+- Grant Hu, (6-3 & 18, c/o 2028)
+- Alex Liang, (6-3, c/o 2028)
+- Bhadra Rupesh, (6-3, c/o 2028)
+- Samantha Shi, (6-3, c/o 2028)
 - Eric Zhan, (6-4, c/o 2028)
-- 
-- 
-- 
+- Jocelyn Zheng, (6-3, c/o 2027)
+
+

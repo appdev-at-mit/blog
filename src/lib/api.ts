@@ -28,7 +28,8 @@ export function getPostBySlug(slug: string): Post {
 }
 
 export function convertMarkdownToHtml(markdown: string): string {
-  const processedContent = remark().use(html).processSync(markdown);
+  console.log(markdown);
+  const processedContent = remark().use(html, {sanitize:false}).processSync(markdown);
   return processedContent.toString();
 }
 

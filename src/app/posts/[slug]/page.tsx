@@ -16,6 +16,7 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
   const { slug } = await params;
   const post: Post = getPostBySlug(slug);
   const contentHtml = convertMarkdownToHtml(post.content);
+  console.log("contentHtml", contentHtml);
   const contentHtmlHighlighted = await unified()
     .use(rehypeParse, { fragment: true })
     .use(rehypeHighlight)

@@ -36,5 +36,9 @@
 }
 
 .markdown img {
-  @apply max-w-full h-auto rounded-lg my-4;
+  @apply max-w-full h-auto rounded-lg my-4 mx-auto block;
+}
+
+.markdown a {
+  @apply text-appdev-blue hover:text-appdev-blue-dark;
 }

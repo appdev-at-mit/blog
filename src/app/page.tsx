@@ -11,9 +11,9 @@ export default function Home() {
   const posts: Post[] = getAllPosts();
 
   return (
-    <div className="bg-gray-100">
+    <div className="min-h-screen bg-gray-100 flex flex-col">
       <Navbar />
-      <main className="mx-5 md:mx-10 lg:mx-30 pt-20 bg-gray-100 font-sans h-full">
+      <main className="flex-1 mx-5 md:mx-10 lg:mx-30 pt-20 bg-gray-100">
         <p className="font-mono py-2 tracking-widest text-gray-300 uppercase">
           &lt;main className="mx-5 md:mx-10 lg:mx-30 pt-20 bg-gray-100
           font-sans"&gt;
@@ -22,7 +22,7 @@ export default function Home() {
         <h1 className="text-6xl font-bold text-gray-600 pb-10">
           news and ramblings
         </h1>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
           {posts.map((post, index) => (
             <Link
               href={`/posts/${post.id}`}
@@ -41,8 +41,10 @@ export default function Home() {
             </Link>
           ))}
         </div>
-        <Footer />
       </main>
+      <div className="mx-5 md:mx-10 lg:mx-30 bg-gray-100">
+        <Footer />
+      </div>
     </div>
   );
 }

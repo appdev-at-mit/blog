@@ -37,7 +37,7 @@ We headed into spring with a newly-approved club application, 25 additional memb
 
 Logistics-wise, we switched up our meeting format. Previously, we had groups breakout into work sessions; however, realizing many of our members wanted more foundational knowledge, we replaced those with hands-on workshops. Then, we held individual team meetings during the week that served as standup and work sessions. Despite the added efforts, this structure ended up working much better for project productivity.
 
-Finally, as finals season approached, we held our second demo day, this time featuring deployed versions of our nearly production-ready apps. It was super cool to see everyone's individual contributions, especially those who came in with less experience but had picked up new skills over the course of the semester.
+Finally, as finals season approached, we held our second Demo Day, this time featuring deployed versions of our nearly production-ready apps. It was super cool to see everyone's individual contributions, especially those who came in with less experience but had picked up new skills over the course of the semester.
 
 ## Summer
 

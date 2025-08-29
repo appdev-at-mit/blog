@@ -33,7 +33,7 @@ We wrapped up the semester with our first-ever Demo Day, followed by a team dinn
 
 ## Spring Semester
 
-We launched into spring with a newly-approved club application, 25 additional members, and an ambitious-as-ever exec team. Project-wise, we continued development for MapIT, MIT Clubs, and Full House, with the aim to have them deployed by the end of the semester. We also began establishing a suite of internal development tools, the first being TimTasks (our own version of [Jira](https://www.atlassian.com/software/jira)).
+We headed into spring with a newly-approved club application, 25 additional members, and an ambitious-as-ever exec team. Project-wise, we continued development for MapIT, MIT Clubs, and Full House, with the aim to have them deployed by the end of the semester. We also began establishing a suite of internal development tools, the first being TimTasks (our own version of [Jira](https://www.atlassian.com/software/jira)).
 
 Logistics-wise, we switched up our meeting format. Previously, we had groups breakout into work sessions; however, realizing many of our members wanted more foundational knowledge, we replaced those with hands-on workshops. Then, we held individual team meetings during the week that served as standup and work sessions. Despite the added efforts, this structure ended up working much better for project productivity.
 

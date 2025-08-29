@@ -29,6 +29,8 @@ Meanwhile, our finance chair secured two sponsorships for the year (shoutout Reb
 
 We wrapped up the semester with our first-ever Demo Day, followed by a team dinner at Yamato! This was the first time the whole team had gone out together, and it was really nice getting to bond with everyone as a community.
 
+![](https://github.com/user-attachments/assets/070d5d2d-647f-43e1-bc41-9a2bd947d55e)
+
 ## Spring Semester
 
 We launched into spring with a newly-approved club application, 25 additional members, and an ambitious-as-ever exec team. Project-wise, we continued development for MapIT, MIT Clubs, and Full House, with the aim to have them deployed by the end of the semester. We also began establishing a suite of internal development tools, the first being TimTasks (our own version of [Jira](https://www.atlassian.com/software/jira)).

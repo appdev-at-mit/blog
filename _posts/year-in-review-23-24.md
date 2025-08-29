@@ -29,7 +29,7 @@ Meanwhile, our finance chair secured two sponsorships for the year (shoutout Reb
 
 We wrapped up the semester with our first-ever Demo Day, followed by a team dinner at Yamato! This was the first time the whole team had gone out together, and it was really nice getting to bond with everyone as a community.
 
-![](https://github.com/user-attachments/assets/070d5d2d-647f-43e1-bc41-9a2bd947d55e)
+![](https://github.com/user-attachments/assets/eee00215-68b3-48bd-b1bc-dee328c0b121)
 
 ## Spring Semester
 

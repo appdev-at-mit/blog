@@ -13,7 +13,7 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
       <Navbar />
-      <main className="flex-1 mx-5 md:mx-10 lg:mx-30 pt-20 bg-gray-100">
+      <main className="flex-1 mx-5 md:mx-10 lg:mx-30 pt-20 bg-gray-100 font-sans">
         <p className="font-mono py-2 tracking-widest text-gray-300 uppercase">
           &lt;main className="mx-5 md:mx-10 lg:mx-30 pt-20 bg-gray-100
           font-sans"&gt;

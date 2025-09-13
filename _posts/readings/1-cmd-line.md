@@ -129,7 +129,7 @@ you to use SSH if you're comfortable, though. If you're not familiar, don't stre
 
 ## Understanding `.bashrc`
 
-There is *one* more part to the content I want to cover that doesn't seem to show up anywhere in pwn.college. 
+There is some content I want to cover that doesn't seem to show up anywhere in pwn.college. 
 Part of the power of Linux is the ability to customize your own setup and make your life more convenient in the future.
 We do this with **rc (run command) files**, the most notable of which is your `.bashrc`. 
 
@@ -153,9 +153,11 @@ current working directory is `/home/linus`? Options:
 `/linus/.bashrc`,
 `/home/linus/.bashrc`,
 `/home/eric/.bashrc`,
-`/usr/linus/.bashrc`.
+`/root/.bashrc`.
 
-**Check**: Repeat the same question, but now your home directory is `/home/linus/homework`.
+**Check**: Repeat the same question, but now your current directory is `/home/linus/homework`.
+
+**Check**: Repeat the same question, but now your current directory is `/root` and you are the `root` user.
 
 Okay, now we're sure we know where it goes. As for the contents of the file, it's a series of commands
 in bash (the language that your shell runs in). Essentially, you can think of it as
@@ -173,5 +175,49 @@ The idea with `.bashrc` is that it runs **upon startup**. That is, without havin
 in future terminal sessions, you will get the convenience of using `l`. 
 
 To use it in *this* terminal session, look into the `source` command.
+
+## Installing packages
+
+In a modern operating system, you extend what your computer can do by installing software. 
+This is no different on a Linux machine.
+
+You can install software via a **package manager**. On a machine running the Ubuntu distribution,
+this will be `apt`, but it'll be different on others (for example, Arch uses `pacman`).
+
+**Check**: try to install the `nginx` package, then uninstall it.
+
+**Check**: you may see online tutorials require you to use `sudo`. Is this actually necessary to run `apt`? 
+Let's check by going to... what directory?
+
+**Check**: how can we find the access permissions for `apt`? What do you see? Who is the owner?
+
+**Check**: on my machine, the permissions are `rwxr-xr-x`. Which users can read to it? What about writing? What about executing?
+
+**Check**: why does `apt install nginx` fail? Which files is missing access permissions? How does `sudo` resolve this? What
+is special about the permission bits for the `sudo` command to allow this?
+
+## Closing thoughts
+
+You may be feeling a bit frustrated at all the work and learning so far. This is natural.
+After all, you didn't actually learn how to do *that much* here. You can go around your filesystem,
+change permissions, install packages, and use `sudo`. But that's still a very small subset
+of what you can do on your computer.
+
+I want to reiterate the importance of learning deeply. I could give you a series of groups of words
+to type into your shell. But everybody's machine is slightly different. It's a waste of time
+to help every single person debug every single edge case by giving a new command to type in; instead, 
+it is much more efficient to make clear *what is actually going on* when you use the shell and the
+underlying design that forms it. (Incidentally, "just try it again and hope it works" seems to be
+the general theme behind using LLMs these days. It doesn't work well.)
+
+It's perfectly okay and normal to copy paste things on StackOverflow or things outputted by an LLM.
+But please, keep in mind:
+
+1. Your machine is not the same. Be aware of the things that could be different. Make appropriate modifications
+to the command. If you don't understand the command enough to make these modifications, that is a problem; read
+more about what it does and how to use it. **Never copy paste something without thinking.**
+2. It won't always work first try. *Read the error message.* Almost all the time, it will be something helpful!
+A good understanding of Linux will help you interpret and fix the error very well.
+3. Subtle differences matter. (see: the question posed earlier this reading with 17 different file paths).
 
 

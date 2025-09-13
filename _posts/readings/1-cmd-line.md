@@ -133,7 +133,7 @@ There is some content I want to cover that doesn't seem to show up anywhere in p
 Part of the power of Linux is the ability to customize your own setup and make your life more convenient in the future.
 We do this with **rc (run command) files**, the most notable of which is your `.bashrc`. 
 
-The `.bashrc` file lives in your home directory. First, answer the first two questions you're confident you know what that means:
+The `.bashrc` file lives in your home directory. First, answer the a few questions so you're confident you know what that means:
 
 **Check**: Which of the following paths should lead to your `.bashrc` file, if you are the user `linus` and your
 current working directory is `/home/linus`? Options: 

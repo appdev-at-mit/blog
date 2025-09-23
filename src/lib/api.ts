@@ -7,6 +7,7 @@ import { remark } from "remark";
 import html from "remark-html";
 
 const postsDirectory = join(process.cwd(), "_posts");
+const readingsDirectory = join(postsDirectory, "readings");
 
 export function getPostBySlug(slug: string): Post {
   const fullPath = join(postsDirectory, `${slug}.md`);
@@ -35,14 +36,31 @@ export function convertMarkdownToHtml(markdown: string): string {
 
 export function getAllPosts(): Post[] {
   const fileNames = fs.readdirSync(postsDirectory);
-  fileNames.sort((a, b) => {
+  const fileNamesFiltered = fileNames.filter((fileName) => fileName.endsWith(".md"));
+  fileNamesFiltered.sort((a, b) => {
     const dateA = new Date(getPostBySlug(a.replace(/\.md$/, "")).date);
     const dateB = new Date(getPostBySlug(b.replace(/\.md$/, "")).date);
     return dateB.getTime() - dateA.getTime();
   });
-  const posts: Post[] = fileNames.map((fileName) => {
+  const posts: Post[] = fileNamesFiltered.map((fileName) => {
     const slug = fileName.replace(/\.md$/, "");
     return getPostBySlug(slug);
+  });
+
+  return posts;
+}
+
+export function getAllReadings(): Post[] {
+  const fileNames = fs.readdirSync(readingsDirectory);
+  const fileNamesFiltered = fileNames.filter((fileName) => fileName.endsWith(".md"));
+  fileNamesFiltered.sort((a, b) => {
+    const dateA = new Date(getPostBySlug(a.replace(/\.md$/, "")).date);
+    const dateB = new Date(getPostBySlug(b.replace(/\.md$/, "")).date);
+    return dateB.getTime() - dateA.getTime();
+  });
+  const posts: Post[] = fileNamesFiltered.map((fileName) => {
+    const slug = fileName.replace(/\.md$/, "");
+    return getPostBySlug(`readings/${slug}`);
   });
 
   return posts;

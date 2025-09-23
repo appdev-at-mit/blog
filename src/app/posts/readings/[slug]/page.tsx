@@ -1,0 +1,54 @@
+import { Post } from "@/interfaces/post";
+import AppWindow from "@/app/components/appwindow";
+import Navbar from "@/app/components/navbar";
+import Footer from "@/app/components/footer";
+import { getPostBySlug, convertMarkdownToHtml } from "@/lib/api";
+import MDBody from "@/app/components/mdbody";
+
+import Link from "next/link";
+
+import rehypeHighlight from "rehype-highlight";
+import rehypeParse from "rehype-parse";
+import rehypeStringify from "rehype-stringify";
+import { unified } from "unified";
+
+export default async function Page({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  const post: Post = getPostBySlug("readings/" + slug);
+  const contentHtml = convertMarkdownToHtml(post.content);
+  console.log("contentHtml", contentHtml);
+  const contentHtmlHighlighted = await unified()
+    .use(rehypeParse, { fragment: true })
+    .use(rehypeHighlight)
+    .use(rehypeStringify)
+    .process(contentHtml);
+  return (
+    <div className="bg-gray-100 min-h-screen flex flex-col">
+      <Navbar />
+      <article className="flex-1 mx-5 md:mx-10 lg:mx-80 pt-10 font-sans">
+        <Link
+          href="/"
+          className="font-mono py-2 tracking-widest text-gray-300 uppercase pb-5 block"
+        >
+          &lt; back to journal
+        </Link>
+        <AppWindow color={0}>
+          <h1 className="text-4xl font-bold pb-3">{post.title}</h1>
+          <p className="font-mono uppercase text-sm pb-3">
+            {post.author.name} | {new Date(post.date).toLocaleDateString()}
+          </p>
+          <MDBody>
+            <div
+              dangerouslySetInnerHTML={{
+                __html: String(contentHtmlHighlighted),
+              }}
+            />
+          </MDBody>
+        </AppWindow>
+      </article>
+      <div className="mx-5 md:mx-10 lg:mx-80 pt-10">
+        <Footer />
+      </div>
+    </div>
+  );
+}
